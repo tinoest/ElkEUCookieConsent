@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.elkarte.net/site/package-info">
+<package-info xmlns="http://www.elkarte.net/site/package-info" xmlns:elk="http://www.elkarte.net/">
+	<id>tinoest:ElkEUCookieConsent</id>
+	<name>Elkarte EU Cookie Consent</name>
+	<version>1.0.0</version>
+	<type>addon</type>
+	<license><![CDATA[
+/**
+ * EU Cookie Consent
+ *
+ * @author tinoest
+ * @license BSD-3
+ *
+ * @version 1.0.0
+ */
+]]></license>
+	<install for="1.1 - 1.1.99">
+		<license type="inline">This Elkarte addon is released under a BSD-3-Clause license.</license>
+		<require-file name="EUCookieConsent.integration.php" destination="SOURCEDIR" />
+		<hook hook="integrate_init_theme" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_init_theme_eu_cookie_consent" />
+		<hook hook="integrate_buffer" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_buffer_eu_cookie_consent" />
+	</install>
+	<uninstall for="1.1 - 1.1.99">
+		<hook reverse="true" hook="integrate_init_theme" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_init_theme_eu_cookie_consent" />
+		<hook reverse="true" hook="integrate_buffer" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_buffer_eu_cookie_consent" />
+		<remove-file name="SOURCEDIR/EUCookieConsent.integration.php" />
+	</uninstall>
+</package-info>
