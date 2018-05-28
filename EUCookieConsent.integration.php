@@ -1,9 +1,15 @@
 <?php
 
 // integrate_init_theme
-function int_init_theme_eu_cookie_consent()
+function int_init_theme_EUCookieConsent()
 {
-	global $context;
+	global $context, $txt, $modSettings;
+
+	// If its not enabled then there is no point in continuing	
+	if(empty($modSettings['eucookieconsent_enabled'])) 
+		return;
+
+	loadLanguage('EUCookieConsent');
 
         // EU cookie mod
 	$context['html_headers'] .= '
@@ -60,11 +66,15 @@ function int_init_theme_eu_cookie_consent()
 		}
 	</style>';
 
+	$eucookieconsent_txt = empty($modSettings['eucookieconsent_custom_text']) ? $txt['eucookieconsent_string'] : $modSettings['eucookieconsent_custom_text'];
+	$eucookieconsent_url = empty($modSettings['eucookieconsent_custom_url']) ? '' : '<a style="color: #fff;" href="'.$modSettings['eucookieconsent_custom_url'].'">'.$txt['eucookieconsent_more_info'].'</a>';
+
 	$context['insert_after_template'] = '
 	<div id="eu_cookie_message">
-		<div id="eu_cookie_notice" style="background: #000; background-color: rgba(0,0,0,0.80); color: #fff;">	
-			This website uses cookies to ensure you get the best experience on our website &nbsp;&nbsp;
-			<button id="eu_cookie_button" type="button">OK</button>
+		<div id="eu_cookie_notice" style="background: #000; background-color: rgba(0,0,0,0.80); color: #fff;">
+			'.$eucookieconsent_txt.'
+			'.$eucookieconsent_url.'
+			<button id="eu_cookie_button" type="button">'.$txt['eucookieconsent_ok'].'</button>
 		</div>
 	</div>
 
@@ -79,16 +89,92 @@ function int_init_theme_eu_cookie_consent()
 }
 
 // This doesn't actually do anything with the buffer it just unsets the session if not allowed
-function int_buffer_eu_cookie_consent( $buffer )
+function int_buffer_EUCookieConsent( $buffer )
 {
-	global $user_info;
+	global $user_info, $modSettings;
 
-	if($user_info['is_guest'] && !array_key_exists('eu_cookie_consent', $_COOKIE)) {
+	// If its not enabled then there is no point in continuing	
+	if(empty($modSettings['eucookieconsent_enabled'])) 
+		return $buffer;
+
+	if($user_info['is_guest'] && !empty($modSettings['eucookieconsent_session']) && !array_key_exists('eu_cookie_consent', $_COOKIE)) {
 		unset($_COOKIE['PHPSESSID']);
 		setcookie('PHPSESSID', null, -1, '/');
 	}
 
 	return $buffer;
+}
+
+
+/**
+ * int_adminAreasEUCookieConsent()
+ *
+ * - Admin Hook, integrate_admin_areas, called from Admin.php
+ * - Used to add/modify admin menu areas
+ *
+ * @param mixed[] $admin_areas
+ */
+function int_adminAreasEUCookieConsent(&$admin_areas)
+{
+	global $txt;
+	loadLanguage('EUCookieConsent');
+	$admin_areas['config']['areas']['addonsettings']['subsections']['eucookieconsent'] = array($txt['eucookieconsent_title']);
+}
+
+/**
+ * int_adminEUCookieConsent()
+ *
+ * - Admin Hook, integrate_sa_modify_modifications, called from AddonSettings.controller.php
+ * - Used to add subactions to the addon area
+ *
+ * @param mixed[] $sub_actions
+ */
+function int_adminEUCookieConsent(&$sub_actions)
+{
+	global $context, $txt;
+	$sub_actions['eucookieconsent'] = array(
+		'dir' => SOURCEDIR,
+		'file' => 'EUCookieConsent.integration.php',
+		'function' => 'eucookieconsent_settings',
+		'permission' => 'admin_forum',
+	);
+	$context[$context['admin_menu_name']]['tab_data']['tabs']['eucookieconsent']['description'] = $txt['eucookieconsent_desc'];
+}
+/**
+ * eucookieconsent_settings()
+ *
+ * - Defines our settings array and uses our settings class to manage the data
+ */
+function eucookieconsent_settings()
+{
+	global $txt, $context, $scripturl, $modSettings;
+	loadLanguage('EUCookieConsent');
+	// Lets build a settings form
+	require_once(SUBSDIR . '/SettingsForm.class.php');
+	// Instantiate the form
+	$euCookieConsentSettings = new Settings_Form();
+	// All the options, well at least some of them!
+	$config_vars = array(
+		array('check',	'eucookieconsent_enabled', 'postinput' => $txt['eucookieconsent_enabled_desc']),
+		array('title',	'eucookieconsent_options'),
+		array('check',	'eucookieconsent_session'),
+		array('text', 	'eucookieconsent_custom_text'),
+		array('text', 	'eucookieconsent_custom_url'),
+	);
+	// Load the settings to the form class
+	$euCookieConsentSettings->settings($config_vars);
+	// Saving?
+	if (isset($_GET['save']))
+	{
+		checkSession();
+		Settings_Form::save_db($config_vars);
+		redirectexit('action=admin;area=addonsettings;sa=eucookieconsent');
+	}
+	// Continue on to the settings template
+	$context['settings_title'] = $txt['eucookieconsent_title'];
+	$context['page_title'] = $context['settings_title'] = $txt['eucookieconsent_settings'];
+	$context['post_url'] = $scripturl . '?action=admin;area=addonsettings;sa=eucookieconsent;save';
+	Settings_Form::prepare_db($config_vars);
 }
 
 ?>

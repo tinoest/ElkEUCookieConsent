@@ -18,12 +18,18 @@
 	<install for="1.1 - 1.1.99">
 		<license type="inline">This Elkarte addon is released under a BSD-3-Clause license.</license>
 		<require-file name="EUCookieConsent.integration.php" destination="SOURCEDIR" />
-		<hook hook="integrate_init_theme" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_init_theme_eu_cookie_consent" />
-		<hook hook="integrate_buffer" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_buffer_eu_cookie_consent" />
+		<require-file name="EUCookieConsent.english.php" destination="LANGUAGEDIR/english">The language strings</require-file>
+		<hook hook="integrate_init_theme" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_init_theme_EUCookieConsent" />
+		<hook hook="integrate_buffer" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_buffer_EUCookieConsent" />
+		<hook hook="integrate_admin_areas" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_adminAreasEUCookieConsent" />
+		<hook hook="integrate_sa_modify_modifications" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_adminEUCookieConsent" />
 	</install>
 	<uninstall for="1.1 - 1.1.99">
+		<hook reverse="true" hook="integrate_admin_areas" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_adminAreasEUCookieConsent" />
+		<hook reverse="true" hook="integrate_sa_modify_modifications" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_adminEUCookieConsent" />
 		<hook reverse="true" hook="integrate_init_theme" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_init_theme_eu_cookie_consent" />
 		<hook reverse="true" hook="integrate_buffer" file="SOURCEDIR/EUCookieConsent.integration.php" function="int_buffer_eu_cookie_consent" />
 		<remove-file name="SOURCEDIR/EUCookieConsent.integration.php" />
+		<remove-file name="LANGUAGEDIR/EUCookieConsent.english.php" />
 	</uninstall>
 </package-info>
