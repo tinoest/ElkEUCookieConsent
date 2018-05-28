@@ -81,7 +81,9 @@ function int_init_theme_eu_cookie_consent()
 // This doesn't actually do anything with the buffer it just unsets the session if not allowed
 function int_buffer_eu_cookie_consent( $buffer )
 {
-	if(!array_key_exists('eu_cookie_consent', $_COOKIE)) {
+	global $user_info;
+
+	if($user_info['is_guest'] && !array_key_exists('eu_cookie_consent', $_COOKIE)) {
 		unset($_COOKIE['PHPSESSID']);
 		setcookie('PHPSESSID', null, -1, '/');
 	}
